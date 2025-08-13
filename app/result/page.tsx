@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
 
@@ -36,7 +36,9 @@ export default function ResultPage() {
   const [user, setUser] = useState<User | null>(null)
   const [creators, setCreators] = useState<Creator[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     const checkUser = async () => {
@@ -53,16 +55,23 @@ export default function ResultPage() {
   }, [router])
 
   useEffect(() => {
+    // Get category from URL params
+    const category = searchParams.get('category')
+    setSelectedCategory(category)
+  }, [searchParams])
+
+  useEffect(() => {
     const fetchCreators = async () => {
       try {
         console.log('Fetching creators...')
+        console.log('Selected category:', selectedCategory)
         
         // Try to fetch creators with detailed error logging
         const { data, error } = await supabase
           .from('creators')
           .select('*')
           .order('total_followers', { ascending: false })
-          .limit(20)
+          .limit(50) // Increased limit to have more options for filtering
 
         console.log('Supabase response:', { data, error })
         
@@ -70,8 +79,18 @@ export default function ResultPage() {
           console.error('Error fetching creators:', error)
           setCreators([])
         } else {
-          console.log('Creators fetched successfully:', data?.length || 0)
-          setCreators(data || [])
+          console.log('All creators fetched:', data?.length || 0)
+          
+          // Filter creators by category if specified
+          let filteredCreators = data || []
+          if (selectedCategory) {
+            filteredCreators = data?.filter(creator => 
+              creator.categories && creator.categories.includes(selectedCategory)
+            ) || []
+            console.log(`Creators filtered by category '${selectedCategory}':`, filteredCreators.length)
+          }
+          
+          setCreators(filteredCreators)
         }
       } catch (error) {
         console.error('Error:', error)
@@ -86,7 +105,7 @@ export default function ResultPage() {
     } else {
       setLoading(false)
     }
-  }, [user])
+  }, [user, selectedCategory]) // Re-fetch when category changes
 
   const formatFollowers = (count: number) => {
     if (count >= 1000000) {
@@ -153,6 +172,27 @@ export default function ResultPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {selectedCategory && (
+          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">
+                  Categoria Identificada pela IA
+                </h3>
+                <div className="mt-1 text-sm text-blue-700">
+                  Seu produto foi categorizado como <span className="font-semibold capitalize">{selectedCategory}</span>. 
+                  Mostrando influenciadores especializados nesta categoria.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="mb-6">
           <p className="text-gray-600">
             Encontramos {creators.length} influenciadores que podem ser perfeitos para sua marca.

@@ -35,6 +35,23 @@ export default function Onboarding() {
         throw new Error('You must be logged in to complete onboarding')
       }
       
+      // Categorize the product using AI
+      console.log('Categorizing product with AI...')
+      const categoryResponse = await fetch('/api/categorize-product', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productDescription: productDescription.trim()
+        })
+      })
+      
+      const categoryData = await categoryResponse.json()
+      const category = categoryData.category || 'bitcoin' // Fallback to bitcoin
+      
+      console.log('Product categorized as:', category)
+      
       const { error } = await supabase
         .from('onboarding_answers')
         .insert({
@@ -50,8 +67,8 @@ export default function Onboarding() {
       }
       
       console.log('Onboarding data saved successfully')
-       // Redirecionar para a página de resultados
-       router.push('/result')
+      // Redirect to results page with the AI-determined category
+      router.push(`/result?category=${encodeURIComponent(category)}`)
     } catch (error) {
         console.error('Error submitting onboarding data:', error)
         setError(error instanceof Error ? error.message : 'Failed to save your information. Please try again.')
