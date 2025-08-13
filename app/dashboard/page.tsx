@@ -8,6 +8,7 @@ import type { User } from '@supabase/supabase-js'
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -110,7 +111,7 @@ export default function Dashboard() {
                 Get matched with the most relevant bitcoin-only and crypto content creators for your brand in seconds.
               </p>
               <button
-                onClick={() => {}}
+                onClick={() => router.push('/onboarding')}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Get Matches
