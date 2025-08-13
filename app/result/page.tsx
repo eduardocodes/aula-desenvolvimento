@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
@@ -35,6 +35,7 @@ interface Creator {
 export default function ResultPage() {
   const [user, setUser] = useState<User | null>(null)
   const [creators, setCreators] = useState<Creator[]>([])
+  const [filteredCreators, setFilteredCreators] = useState<Creator[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const router = useRouter()
@@ -42,13 +43,17 @@ export default function ResultPage() {
 
   useEffect(() => {
     const checkUser = async () => {
+      console.log('=== CHECKING USER ===')
       const { data: { user } } = await supabase.auth.getUser()
+      console.log('Auth user:', user)
       // Temporarily allow access without authentication for demonstration
       // if (!user) {
       //   router.push('/')
       //   return
       // }
-      setUser(user || { id: 'demo-user' } as User)
+      const finalUser = user || { id: '58872a2e-a17e-4384-b9e2-a80a4f7988c0', email: 'demo@example.com' } as User
+      console.log('Final user set:', finalUser)
+      setUser(finalUser)
     }
 
     checkUser()
@@ -60,52 +65,109 @@ export default function ResultPage() {
     setSelectedCategory(category)
   }, [searchParams])
 
-  useEffect(() => {
-    const fetchCreators = async () => {
-      try {
-        console.log('Fetching creators...')
-        console.log('Selected category:', selectedCategory)
-        
-        // Try to fetch creators with detailed error logging
-        const { data, error } = await supabase
-          .from('creators')
-          .select('*')
-          .order('total_followers', { ascending: false })
-          .limit(50) // Increased limit to have more options for filtering
-
-        console.log('Supabase response:', { data, error })
-        
-        if (error) {
-          console.error('Error fetching creators:', error)
-          setCreators([])
-        } else {
-          console.log('All creators fetched:', data?.length || 0)
-          
-          // Filter creators by category if specified
-          let filteredCreators = data || []
-          if (selectedCategory) {
-            filteredCreators = data?.filter(creator => 
-              creator.categories && creator.categories.includes(selectedCategory)
-            ) || []
-            console.log(`Creators filtered by category '${selectedCategory}':`, filteredCreators.length)
-          }
-          
-          setCreators(filteredCreators)
-        }
-      } catch (error) {
-        console.error('Error:', error)
-        setCreators([])
-      } finally {
-        setLoading(false)
-      }
+  const saveUserMatch = useCallback(async (matchedCreators: Creator[], category: string | null) => {
+    console.log('saveUserMatch called with:', { user, matchedCreatorsCount: matchedCreators.length, category })
+    
+    if (!user || !matchedCreators.length) {
+      console.log('Skipping save: no user or no creators')
+      return
     }
 
-    if (user) {
-      fetchCreators()
-    } else {
+    try {
+      console.log('Calling save-match API...')
+      const response = await fetch('/api/save-match', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          creatorIds: matchedCreators.map(c => c.id),
+          category: category || 'all'
+        })
+      })
+
+      const result = await response.json()
+      console.log('Save match API response:', result)
+
+      if (!response.ok) {
+        console.error('Failed to save match:', result)
+      } else {
+        console.log('Match saved successfully via API:', result.action)
+      }
+    } catch (error) {
+      console.error('Error calling save-match API:', error)
+    }
+  }, [user])
+
+  const fetchCreators = async () => {
+    try {
+      console.log('=== FETCHING CREATORS ===')
+      console.log('Fetching creators...')
+      
+      // Try to fetch creators with detailed error logging
+      const { data, error } = await supabase
+        .from('creators')
+        .select('*')
+        .order('total_followers', { ascending: false })
+        .limit(50) // Increased limit to have more options for filtering
+
+      console.log('Supabase response:', { data, error })
+      
+      if (error) {
+        console.error('Error fetching creators:', error)
+        setCreators([])
+      } else {
+        console.log('All creators fetched:', data?.length || 0)
+        setCreators(data || [])
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      setCreators([])
+    } finally {
       setLoading(false)
     }
-  }, [user, selectedCategory]) // Re-fetch when category changes
+  }
+
+  useEffect(() => {
+    console.log('=== USER EFFECT TRIGGERED ===', { user: user?.id })
+    if (user) {
+      console.log('User exists, fetching creators...')
+      fetchCreators()
+    } else {
+      console.log('No user, skipping creator fetch')
+      setLoading(false)
+    }
+  }, [user])
+
+  useEffect(() => {
+    console.log('=== FILTERING EFFECT TRIGGERED ===', { 
+      creatorsCount: creators.length, 
+      selectedCategory,
+      user: user?.id 
+    })
+    
+    if (creators.length > 0 && selectedCategory) {
+      console.log('Filtering creators for category:', selectedCategory)
+      const filtered = creators.filter(creator => {
+        if (selectedCategory === 'all') return true
+        return creator.categories && creator.categories.includes(selectedCategory)
+      })
+      console.log('Filtered creators:', filtered.length)
+      setFilteredCreators(filtered)
+      
+      // Save the match when creators are filtered
+      if (filtered.length > 0 && user) {
+        console.log('Calling saveUserMatch with', filtered.length, 'creators and user:', user.id)
+        saveUserMatch(filtered, selectedCategory)
+      } else {
+        console.log('No filtered creators to save or no user. Filtered:', filtered.length, 'User:', !!user)
+      }
+    } else {
+      console.log('Skipping filter - creators:', creators.length, 'selectedCategory:', selectedCategory)
+      setFilteredCreators([])
+    }
+  }, [creators, selectedCategory, saveUserMatch, user])
 
   const formatFollowers = (count: number) => {
     if (count >= 1000000) {
@@ -195,12 +257,12 @@ export default function ResultPage() {
         
         <div className="mb-6">
           <p className="text-gray-600">
-            Encontramos {creators.length} influenciadores que podem ser perfeitos para sua marca.
+            Encontramos {filteredCreators.length} influenciadores que podem ser perfeitos para sua marca.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {creators.map((creator) => (
+          {filteredCreators.map((creator) => (
             <div key={creator.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -336,7 +398,7 @@ export default function ResultPage() {
           ))}
         </div>
 
-        {creators.length === 0 && (
+        {filteredCreators.length === 0 && (
           <div className="text-center py-12">
               <p className="text-gray-500 text-lg">Nenhum influenciador encontrado.</p>
             </div>
