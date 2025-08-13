@@ -50,8 +50,8 @@ export default function Onboarding() {
       }
       
       console.log('Onboarding data saved successfully')
-      // Redirecionar para o dashboard com sucesso
-      router.push('/dashboard?onboarding=completed')
+       // Redirecionar para a página de resultados
+       router.push('/result')
     } catch (error) {
         console.error('Error submitting onboarding data:', error)
         setError(error instanceof Error ? error.message : 'Failed to save your information. Please try again.')
