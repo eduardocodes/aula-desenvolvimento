@@ -153,7 +153,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Success notification */}
       {showSuccess && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in">
@@ -357,19 +357,38 @@ export default function Dashboard() {
               </div>
             </div>
           ) : (
-            <div className="min-h-96 flex items-center justify-center">
-              <div className="text-center max-w-4xl mx-auto">
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                  Find Your Perfect Bitcoin Influencers
+            <div className="min-h-96 flex items-center justify-center px-4">
+              <div className="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 md:p-12 max-w-2xl mx-auto text-center border border-gray-700/50">
+                {/* Icons */}
+                <div className="flex justify-center items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </div>
+                
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  🔥 Find Your Perfect Bitcoin Influencers
                 </h1>
-                <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
+                <p className="text-lg text-gray-300 mb-8 leading-relaxed">
                   Get matched with the most relevant bitcoin-only and crypto content creators for your brand in seconds.
                 </p>
                 <button
                   onClick={() => router.push('/onboarding')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 hover:shadow-orange-500/25"
                 >
-                  Get Matches
+                  Get My Matches
                 </button>
               </div>
             </div>
