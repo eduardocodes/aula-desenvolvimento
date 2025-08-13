@@ -68,18 +68,6 @@ export default function ResultPage() {
         
         if (error) {
           console.error('Error fetching creators:', error)
-          console.error('Error details:', {
-            message: error?.message,
-            details: error?.details,
-            hint: error?.hint,
-            code: error?.code
-          })
-          
-          if (error?.code === '42501') {
-            console.error('RLS Policy Error: A tabela creators tem Row Level Security habilitado mas não possui políticas configuradas.')
-            console.error('Para resolver: Acesse o Supabase Dashboard > Authentication > Policies e crie uma política de leitura para a tabela creators.')
-          }
-          
           setCreators([])
         } else {
           console.log('Creators fetched successfully:', data?.length || 0)
@@ -310,18 +298,7 @@ export default function ResultPage() {
 
         {creators.length === 0 && (
           <div className="text-center py-12">
-              <div className="max-w-md mx-auto">
-                <p className="text-gray-500 text-lg mb-4">Nenhum influenciador encontrado.</p>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-left">
-                  <h3 className="font-semibold text-yellow-800 mb-2">Possível problema de configuração:</h3>
-                  <p className="text-yellow-700 mb-2">
-                    A tabela 'creators' pode ter Row Level Security (RLS) habilitado sem políticas configuradas.
-                  </p>
-                  <p className="text-yellow-700">
-                    <strong>Solução:</strong> Acesse o Supabase Dashboard → Authentication → Policies e crie uma política de leitura para a tabela 'creators'.
-                  </p>
-                </div>
-              </div>
+              <p className="text-gray-500 text-lg">Nenhum influenciador encontrado.</p>
             </div>
         )}
       </div>
