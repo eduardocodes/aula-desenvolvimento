@@ -1,15 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     // Verificar se o usuário está autenticado
@@ -23,6 +25,15 @@ export default function Dashboard() {
       
       setUser(user)
       setLoading(false)
+      
+      // Verificar se veio do onboarding
+      if (searchParams.get('onboarding') === 'completed') {
+        setShowSuccess(true)
+        // Remover o parâmetro da URL
+        router.replace('/dashboard')
+        // Esconder a mensagem após 5 segundos
+        setTimeout(() => setShowSuccess(false), 5000)
+      }
     }
 
     getUser()
@@ -54,6 +65,23 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Success notification */}
+      {showSuccess && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span className="font-medium">Onboarding completed successfully!</span>
+          <button
+            onClick={() => setShowSuccess(false)}
+            className="ml-2 text-green-200 hover:text-white"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
       <nav className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
