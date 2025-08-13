@@ -122,23 +122,27 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="min-h-96 flex items-center justify-center">
             <div className="w-full max-w-2xl mx-auto">
               {currentStep === 1 ? (
                 <>
-                  <div className="text-center mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                      Welcome to Bitcoin Influencer
-                    </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-400">
-                      Let's get started by learning about your company
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
+                  <div className="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 md:p-12 border border-gray-700/50">
+                    <div className="text-center mb-8">
+                      <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      </div>
+                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                        Welcome to Bitcoin Influencer
+                      </h1>
+                      <p className="text-lg text-gray-300">
+                        Let's get started by learning about your company
+                      </p>
+                    </div>
                     {error && (
                       <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
                         {error}
@@ -146,7 +150,7 @@ export default function Onboarding() {
                     )}
                     
                     <div className="mb-6">
-                      <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label htmlFor="companyName" className="block text-sm font-medium text-gray-300 mb-2">
                         Company Name
                       </label>
                       <input
@@ -157,7 +161,7 @@ export default function Onboarding() {
                           setCompanyName(e.target.value)
                           clearError()
                         }}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
+                        className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-700/50 text-white placeholder-gray-400 transition-colors backdrop-blur-sm"
                         placeholder="Enter your company name"
                       />
                     </div>
@@ -165,14 +169,14 @@ export default function Onboarding() {
                     <div className="flex justify-between">
                       <button
                         onClick={handleBack}
-                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+                        className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors font-medium backdrop-blur-sm"
                       >
                         Back
                       </button>
                       <button
                         onClick={handleNext}
                         disabled={isLoading}
-                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+                        className="px-6 py-3 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium flex items-center gap-2"
                       >
                         {isLoading ? (
                           <>
@@ -183,7 +187,7 @@ export default function Onboarding() {
                             Saving...
                           </>
                         ) : (
-                          'Complete'
+                          'Next'
                         )}
                       </button>
                     </div>
@@ -191,16 +195,20 @@ export default function Onboarding() {
                 </>
               ) : currentStep === 2 ? (
                 <>
-                  <div className="text-center mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                      Product Details
-                    </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-400">
-                      Tell us about the product you're promoting.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
+                  <div className="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 md:p-12 border border-gray-700/50">
+                    <div className="text-center mb-8">
+                      <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                      </div>
+                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                        Product Details
+                      </h1>
+                      <p className="text-lg text-gray-300">
+                        Tell us about the product you're promoting.
+                      </p>
+                    </div>
                     {error && (
                       <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
                         {error}
@@ -208,7 +216,7 @@ export default function Onboarding() {
                     )}
                     
                     <div className="mb-6">
-                      <label htmlFor="productName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label htmlFor="productName" className="block text-sm font-medium text-gray-300 mb-2">
                         Product Name
                       </label>
                       <input
@@ -219,13 +227,13 @@ export default function Onboarding() {
                           setProductName(e.target.value)
                           clearError()
                         }}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
+                        className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-700/50 text-white placeholder-gray-400 transition-colors backdrop-blur-sm"
                         placeholder="Enter your product name"
                       />
                     </div>
                     
                     <div className="mb-6">
-                      <label htmlFor="productUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label htmlFor="productUrl" className="block text-sm font-medium text-gray-300 mb-2">
                         Product URL
                       </label>
                       <input
@@ -236,7 +244,7 @@ export default function Onboarding() {
                           setProductUrl(e.target.value)
                           clearError()
                         }}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
+                        className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-700/50 text-white placeholder-gray-400 transition-colors backdrop-blur-sm"
                         placeholder="https://example.com/product"
                       />
                     </div>
@@ -244,13 +252,13 @@ export default function Onboarding() {
                     <div className="flex justify-between">
                       <button
                         onClick={handleBack}
-                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+                        className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors font-medium backdrop-blur-sm"
                       >
                         Back
                       </button>
                       <button
                         onClick={handleNext}
-                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+                        className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium"
                       >
                         Next
                       </button>
@@ -259,16 +267,20 @@ export default function Onboarding() {
                 </>
               ) : (
                 <>
-                  <div className="text-center mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                      What does {productName} do and who does it help?
-                    </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-400">
-                      Be specific and highlight the main thing.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
+                  <div className="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 md:p-12 border border-gray-700/50">
+                    <div className="text-center mb-8">
+                      <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                        What does {productName} do and who does it help?
+                      </h1>
+                      <p className="text-lg text-gray-300">
+                        Be specific and highlight the main thing.
+                      </p>
+                    </div>
                     {error && (
                       <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
                         {error}
@@ -276,7 +288,7 @@ export default function Onboarding() {
                     )}
                     
                     <div className="mb-6">
-                      <label htmlFor="productDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label htmlFor="productDescription" className="block text-sm font-medium text-gray-300 mb-2">
                         Product Description
                       </label>
                       <textarea
@@ -286,12 +298,12 @@ export default function Onboarding() {
                           setProductDescription(e.target.value)
                           clearError()
                         }}
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors resize-none"
+                        className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-700/50 text-white placeholder-gray-400 transition-colors resize-none backdrop-blur-sm"
                         placeholder="Describe what your product does and who it helps..."
                         rows={4}
                         maxLength={300}
                       />
-                      <div className="mt-2 text-sm text-gray-500 dark:text-gray-400 text-right">
+                      <div className="mt-2 text-sm text-gray-400 text-right">
                         {productDescription.length}/300
                       </div>
                     </div>
@@ -299,13 +311,13 @@ export default function Onboarding() {
                     <div className="flex justify-between">
                       <button
                         onClick={handleBack}
-                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+                        className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors font-medium backdrop-blur-sm"
                       >
                         Back
                       </button>
                       <button
                         onClick={handleNext}
-                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+                        className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium"
                       >
                         Next
                       </button>
