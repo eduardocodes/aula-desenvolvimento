@@ -8,6 +8,7 @@ export default function Onboarding() {
   const [companyName, setCompanyName] = useState('')
   const [productName, setProductName] = useState('')
   const [productUrl, setProductUrl] = useState('')
+  const [productDescription, setProductDescription] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
 
@@ -15,7 +16,7 @@ export default function Onboarding() {
     if (currentStep === 1) {
       router.push('/dashboard')
     } else {
-      setCurrentStep(1)
+      setCurrentStep(currentStep - 1)
       setError('')
     }
   }
@@ -45,8 +46,18 @@ export default function Onboarding() {
         setError('Please enter a valid URL')
         return
       }
+      setCurrentStep(3)
+    } else if (currentStep === 3) {
+      if (!productDescription.trim()) {
+        setError('Product description is required')
+        return
+      }
+      if (productDescription.length > 300) {
+        setError('Product description must be 300 characters or less')
+        return
+      }
       // Aqui seria a próxima funcionalidade
-      console.log('Form completed:', { companyName, productName, productUrl })
+      console.log('Form completed:', { companyName, productName, productUrl, productDescription })
     }
   }
 
@@ -111,7 +122,7 @@ export default function Onboarding() {
                     </div>
                   </div>
                 </>
-              ) : (
+              ) : currentStep === 2 ? (
                 <>
                   <div className="text-center mb-8">
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -161,6 +172,61 @@ export default function Onboarding() {
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
                         placeholder="https://example.com/product"
                       />
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <button
+                        onClick={handleBack}
+                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+                      >
+                        Back
+                      </button>
+                      <button
+                        onClick={handleNext}
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-center mb-8">
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                      What does {productName} do and who does it help?
+                    </h1>
+                    <p className="text-lg text-gray-600 dark:text-gray-400">
+                      Be specific and highlight the main thing.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
+                    {error && (
+                      <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
+                        {error}
+                      </div>
+                    )}
+                    
+                    <div className="mb-6">
+                      <label htmlFor="productDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Product Description
+                      </label>
+                      <textarea
+                        id="productDescription"
+                        value={productDescription}
+                        onChange={(e) => {
+                          setProductDescription(e.target.value)
+                          clearError()
+                        }}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors resize-none"
+                        placeholder="Describe what your product does and who it helps..."
+                        rows={4}
+                        maxLength={300}
+                      />
+                      <div className="mt-2 text-sm text-gray-500 dark:text-gray-400 text-right">
+                        {productDescription.length}/300
+                      </div>
                     </div>
                     
                     <div className="flex justify-between">
