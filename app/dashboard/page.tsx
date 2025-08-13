@@ -101,28 +101,20 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 dark:border-gray-700 rounded-lg h-96 flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                Bem-vindo ao Dashboard!
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Você fez login com sucesso usando Supabase Auth.
+          <div className="min-h-96 flex items-center justify-center">
+            <div className="text-center max-w-4xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+                Find Your Perfect Bitcoin Influencers
+              </h1>
+              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Get matched with the most relevant bitcoin-only and crypto content creators for your brand in seconds.
               </p>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Informações do Usuário:
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Email:</strong> {user?.email}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>ID:</strong> {user?.id}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Último login:</strong> {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('pt-BR') : 'N/A'}
-                </p>
-              </div>
+              <button
+                onClick={() => {}}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                Get Matches
+              </button>
             </div>
           </div>
         </div>
