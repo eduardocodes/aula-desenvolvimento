@@ -211,23 +211,26 @@ export default function ResultPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-800 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-950 to-black text-white">
+      <div className="bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <h1 className="text-3xl font-bold text-gray-900">Influenciadores Recomendados</h1>
+          <div className="flex justify-between items-center py-8">
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">Creator Matches</h1>
+              <p className="text-gray-300">We found hundreds of creators for {selectedCategory || 'your product'}!</p>
+            </div>
             <button
               onClick={() => router.push('/dashboard')}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all duration-200 transform hover:scale-105 shadow-lg font-medium"
             >
-              Ir para Dashboard
+              Go to Dashboard
             </button>
           </div>
         </div>
@@ -235,54 +238,53 @@ export default function ResultPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {selectedCategory && (
-          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="mb-8 bg-orange-500/20 border border-orange-500/30 rounded-lg p-4 backdrop-blur-sm">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
+              <div className="bg-orange-500 rounded-full p-1 mr-3">
+                <span className="text-white text-xs font-bold px-2 py-1">{selectedCategory}</span>
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">
-                  Categoria Identificada pela IA
-                </h3>
-                <div className="mt-1 text-sm text-blue-700">
-                  Seu produto foi categorizado como <span className="font-semibold capitalize">{selectedCategory}</span>. 
-                  Mostrando influenciadores especializados nesta categoria.
-                </div>
+              <div>
+                <p className="text-orange-200 text-sm">
+                  AI-identified category: <span className="font-semibold capitalize text-orange-100">{selectedCategory}</span>
+                </p>
               </div>
             </div>
           </div>
         )}
-        
-        <div className="mb-6">
-          <p className="text-gray-600">
-            Encontramos {filteredCreators.length} influenciadores que podem ser perfeitos para sua marca.
-          </p>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCreators.map((creator) => (
-            <div key={creator.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+          {filteredCreators.map((creator, index) => {
+            // Calculate match percentage based on categories and followers
+            const matchPercentage = creator.categories?.includes(selectedCategory || '') ? 
+              (creator.total_followers > 100000 ? '100% match' : 
+               creator.total_followers > 50000 ? '66% match' : '33% match') : '33% match';
+            
+            return (
+            <div key={creator.id} className="bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden hover:bg-gray-800/80 transition-all duration-300 hover:scale-105 shadow-xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900">
+                    <h3 className="text-xl font-semibold text-white">
                       {creator.full_name || creator.username}
                     </h3>
                     {creator.username && (
-                      <p className="text-gray-600">@{creator.username}</p>
+                      <p className="text-gray-400">@{creator.username}</p>
                     )}
                   </div>
-                  {creator.is_btc_only && (
-                    <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                      Bitcoin Only
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+                      {matchPercentage}
                     </span>
-                  )}
+                    {creator.is_btc_only && (
+                      <span className="bg-orange-500 text-white text-xs font-medium px-2 py-1 rounded">
+                        Bitcoin Only
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {creator.location && (
-                  <p className="text-gray-600 mb-3 flex items-center">
+                  <p className="text-gray-400 mb-3 flex items-center">
                     <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                     </svg>
@@ -291,85 +293,77 @@ export default function ResultPage() {
                 )}
 
                 <div className="mb-4">
-                  <p className="text-2xl font-bold text-blue-600">
-                    {formatFollowers(creator.total_followers)} seguidores
+                  <p className="text-2xl font-bold text-white">
+                    {formatFollowers(creator.total_followers)} followers
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   {creator.youtube_followers > 0 && (
                     <div className="text-center">
-                      <div className="flex items-center justify-center text-red-600 mb-1">
+                      <div className="flex items-center justify-center text-red-500 mb-1">
                         {getSocialIcon('youtube')}
                       </div>
-                      <p className="text-sm font-medium">{formatFollowers(creator.youtube_followers)}</p>
+                      <p className="text-sm font-medium text-gray-300">{formatFollowers(creator.youtube_followers)}</p>
+                      <p className="text-xs text-gray-500">Avg Views</p>
                     </div>
                   )}
                   {creator.insta_followers > 0 && (
                     <div className="text-center">
-                      <div className="flex items-center justify-center text-pink-600 mb-1">
+                      <div className="flex items-center justify-center text-pink-500 mb-1">
                         {getSocialIcon('instagram')}
                       </div>
-                      <p className="text-sm font-medium">{formatFollowers(creator.insta_followers)}</p>
+                      <p className="text-sm font-medium text-gray-300">{formatFollowers(creator.insta_followers)}</p>
+                      <p className="text-xs text-gray-500">Followers</p>
                     </div>
                   )}
                   {creator.tiktok_followers > 0 && (
                     <div className="text-center">
-                      <div className="flex items-center justify-center text-black mb-1">
+                      <div className="flex items-center justify-center text-white mb-1">
                         {getSocialIcon('tiktok')}
                       </div>
-                      <p className="text-sm font-medium">{formatFollowers(creator.tiktok_followers)}</p>
+                      <p className="text-sm font-medium text-gray-300">{formatFollowers(creator.tiktok_followers)}</p>
+                      <p className="text-xs text-gray-500">Followers</p>
                     </div>
                   )}
                   {creator.x_followers > 0 && (
                     <div className="text-center">
-                      <div className="flex items-center justify-center text-black mb-1">
+                      <div className="flex items-center justify-center text-white mb-1">
                         {getSocialIcon('x')}
                       </div>
-                      <p className="text-sm font-medium">{formatFollowers(creator.x_followers)}</p>
+                      <p className="text-sm font-medium text-gray-300">{formatFollowers(creator.x_followers)}</p>
+                      <p className="text-xs text-gray-500">Followers</p>
                     </div>
                   )}
                 </div>
 
-                {creator.categories && creator.categories.length > 0 && (
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-1">
-                      {creator.categories.slice(0, 3).map((category, index) => (
-                        <span
-                          key={index}
-                          className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded"
-                        >
-                          {category}
-                        </span>
-                      ))}
-                      {creator.categories.length > 3 && (
-                        <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded">
-                          +{creator.categories.length - 3}
-                        </span>
-                      )}
-                    </div>
+                <div className="mb-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    {creator.youtube_engagement_rate > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-500">Engagement Rate</p>
+                        <p className="text-sm font-medium text-orange-400">{creator.youtube_engagement_rate.toFixed(1)}%</p>
+                      </div>
+                    )}
+                    {creator.tiktok_engagement_rate > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-500">Engagement Rate</p>
+                        <p className="text-sm font-medium text-orange-400">{creator.tiktok_engagement_rate.toFixed(1)}%</p>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
 
-                <div className="flex space-x-2">
+                <div className="grid grid-cols-2 gap-3">
                   {creator.youtube_url && (
                     <a
                       href={creator.youtube_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-red-600 hover:text-red-700"
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                     >
                       {getSocialIcon('youtube')}
-                    </a>
-                  )}
-                  {creator.insta_url && (
-                    <a
-                      href={creator.insta_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-pink-600 hover:text-pink-700"
-                    >
-                      {getSocialIcon('instagram')}
+                      YouTube
                     </a>
                   )}
                   {creator.tiktok_url && (
@@ -377,9 +371,21 @@ export default function ResultPage() {
                       href={creator.tiktok_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-black hover:text-gray-700"
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                     >
                       {getSocialIcon('tiktok')}
+                      TikTok
+                    </a>
+                  )}
+                  {creator.insta_url && (
+                    <a
+                      href={creator.insta_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      {getSocialIcon('instagram')}
+                      Instagram
                     </a>
                   )}
                   {creator.x_url && (
@@ -387,15 +393,17 @@ export default function ResultPage() {
                       href={creator.x_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-black hover:text-gray-700"
+                      className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                     >
                       {getSocialIcon('x')}
+                      X
                     </a>
                   )}
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {filteredCreators.length === 0 && (
