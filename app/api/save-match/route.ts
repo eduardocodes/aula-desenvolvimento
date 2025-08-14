@@ -59,14 +59,26 @@ export async function POST(request: NextRequest) {
         data: updateData 
       })
     } else {
+      // Get the most recent onboarding_answer_id for this user
+      const { data: onboardingData, error: onboardingError } = await supabaseAdmin
+        .from('onboarding_answers')
+        .select('id')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      console.log('Onboarding data:', { onboardingData, onboardingError })
+
       // Create new match - skip user validation for demo
       console.log('Creating new match...')
       const { data: insertData, error: insertError } = await supabaseAdmin
         .from('user_matches')
         .insert({
           user_id: userId,
+          onboarding_answer_id: onboardingData?.id || null,
           creator_ids: creatorIds,
-          search_criteria: searchCriteria
+          search_criteria: JSON.stringify(searchCriteria)
         })
         .select()
 
