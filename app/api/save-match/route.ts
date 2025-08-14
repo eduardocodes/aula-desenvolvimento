@@ -28,17 +28,50 @@ export async function POST(request: NextRequest) {
 
     // Check if a match already exists for this user and category
     const searchCriteria = { category: category || 'all' }
-    const { data: existingMatch, error: searchError } = await supabaseAdmin
+    const searchCriteriaString = JSON.stringify(searchCriteria)
+    console.log('Searching for existing match with criteria:', searchCriteriaString)
+    
+    // First, get all matches for this user to debug
+    const { data: allMatches, error: allMatchesError } = await supabaseAdmin
       .from('user_matches')
       .select('*')
       .eq('user_id', userId)
-      .eq('search_criteria', JSON.stringify(searchCriteria))
-      .maybeSingle()
-
-    console.log('Existing match search:', { existingMatch, searchError })
+      .order('created_at', { ascending: false })
+      .limit(10)
+    
+    console.log('All matches for user:', allMatches?.map(m => ({ 
+      id: m.id, 
+      search_criteria: m.search_criteria,
+      criteria_match: m.search_criteria === searchCriteriaString,
+      created_at: m.created_at 
+    })))
+    
+    // Find existing match by filtering in JavaScript since .eq() seems to have issues
+    const existingMatch = allMatches?.find(match => match.search_criteria === searchCriteriaString) || null
+    console.log('Existing match found:', { 
+      existingMatch: existingMatch ? { id: existingMatch.id, created_at: existingMatch.created_at } : null,
+      searchCriteriaString,
+      totalUserMatches: allMatches?.length 
+    })
 
     if (existingMatch) {
-      // Update existing match
+      // Check if the creator_ids are the same to avoid unnecessary updates
+      const existingCreatorIds = existingMatch.creator_ids || []
+      const newCreatorIds = creatorIds.sort()
+      const existingCreatorIdsSorted = existingCreatorIds.sort()
+      
+      const areCreatorIdsSame = JSON.stringify(newCreatorIds) === JSON.stringify(existingCreatorIdsSorted)
+      
+      if (areCreatorIdsSame) {
+        console.log('Match already exists with same creators - no update needed')
+        return NextResponse.json({ 
+          success: true, 
+          action: 'no_change',
+          data: existingMatch 
+        })
+      }
+      
+      // Update existing match with new creator_ids
       const { data: updateData, error: updateError } = await supabaseAdmin
         .from('user_matches')
         .update({ 

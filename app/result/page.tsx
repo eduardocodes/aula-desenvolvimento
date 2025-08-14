@@ -1,9 +1,14 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
+
+// Função utilitária para gerar chave única do match
+const generateMatchKey = (userId: string, category: string, creatorIds: string[]) => {
+  return `${userId}-${category}-${creatorIds.sort().join(',')}`
+}
 
 interface Creator {
   id: string
@@ -40,19 +45,25 @@ export default function ResultPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
+  
+  // Ref para rastrear último match salvo e evitar duplicatas
+  const lastSavedMatchRef = useRef<string | null>(null)
+  // Ref para controlar se já está salvando
+  const isSavingRef = useRef<boolean>(false)
 
   useEffect(() => {
     const checkUser = async () => {
-      console.log('=== CHECKING USER ===')
+      const timestamp = new Date().toISOString()
+      console.log(`[${timestamp}] === CHECKING USER ===`)
       const { data: { user } } = await supabase.auth.getUser()
-      console.log('Auth user:', user)
+      console.log(`[${timestamp}] Auth user:`, user)
       // Temporarily allow access without authentication for demonstration
       // if (!user) {
       //   router.push('/')
       //   return
       // }
       const finalUser = user || { id: '58872a2e-a17e-4384-b9e2-a80a4f7988c0', email: 'demo@example.com' } as User
-      console.log('Final user set:', finalUser)
+      console.log(`[${timestamp}] Final user set:`, finalUser)
       setUser(finalUser)
     }
 
@@ -61,20 +72,52 @@ export default function ResultPage() {
 
   useEffect(() => {
     // Get category from URL params
+    const timestamp = new Date().toISOString()
     const category = searchParams.get('category')
+    console.log(`[${timestamp}] === CATEGORY EFFECT ===`)
+    console.log(`[${timestamp}] Setting category from URL:`, category)
     setSelectedCategory(category)
   }, [searchParams])
 
   const saveUserMatch = useCallback(async (matchedCreators: Creator[], category: string | null) => {
-    console.log('saveUserMatch called with:', { user, matchedCreatorsCount: matchedCreators.length, category })
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] === SAVE USER MATCH CALLED ===`)
+    console.log(`[${timestamp}] saveUserMatch called with:`, { 
+      userId: user?.id, 
+      matchedCreatorsCount: matchedCreators.length, 
+      category,
+      creatorIds: matchedCreators.map(c => c.id)
+    })
     
-    if (!user || !matchedCreators.length) {
-      console.log('Skipping save: no user or no creators')
-      return
-    }
-
     try {
-      console.log('Calling save-match API...')
+      if (!user || !matchedCreators.length) {
+        console.log(`[${timestamp}] Skipping save: no user or no creators`)
+        return
+      }
+
+      // Verificar se já está salvando
+      if (isSavingRef.current) {
+        console.log(`[${timestamp}] ⚠️ ALREADY SAVING - Skipping concurrent save attempt`)
+        return
+      }
+
+      // Gerar chave única para este match
+      console.log(`[${timestamp}] 🔑 Generating match key...`)
+      const matchKey = generateMatchKey(user.id, category || 'all', matchedCreators.map(c => c.id))
+      console.log(`[${timestamp}] Generated match key:`, matchKey)
+      console.log(`[${timestamp}] Last saved match key:`, lastSavedMatchRef.current)
+      
+      // Verificar se este match já foi salvo
+      if (lastSavedMatchRef.current === matchKey) {
+        console.log(`[${timestamp}] ⚠️ DUPLICATE DETECTED - Skipping save for match key:`, matchKey)
+        return
+      }
+
+      // Marcar como salvando
+      isSavingRef.current = true
+      console.log(`[${timestamp}] 🔒 Setting isSaving to true`)
+
+      console.log(`[${timestamp}] 🚀 Calling save-match API...`)
       const response = await fetch('/api/save-match', {
         method: 'POST',
         headers: {
@@ -88,22 +131,34 @@ export default function ResultPage() {
       })
 
       const result = await response.json()
-      console.log('Save match API response:', result)
+      console.log(`[${timestamp}] Save match API response:`, result)
 
       if (!response.ok) {
-        console.error('Failed to save match:', result)
+        console.error(`[${timestamp}] ❌ Failed to save match:`, result)
       } else {
-        console.log('Match saved successfully via API:', result.action)
+        console.log(`[${timestamp}] ✅ Match saved successfully via API:`, result.action)
+        // Atualizar a referência do último match salvo
+        lastSavedMatchRef.current = matchKey
+        console.log(`[${timestamp}] Updated lastSavedMatchRef to:`, matchKey)
       }
+      
+      // Liberar o lock de salvamento
+      isSavingRef.current = false
+      console.log(`[${timestamp}] 🔓 Setting isSaving to false`)
     } catch (error) {
-      console.error('Error calling save-match API:', error)
+      console.error(`[${timestamp}] ❌ CRITICAL ERROR in saveUserMatch:`, error)
+      console.error(`[${timestamp}] Error stack:`, error instanceof Error ? error.stack : 'No stack trace')
+      // Liberar o lock de salvamento em caso de erro
+      isSavingRef.current = false
+      console.log(`[${timestamp}] 🔓 Setting isSaving to false (error case)`)
     }
   }, [user])
 
   const fetchCreators = async () => {
     try {
-      console.log('=== FETCHING CREATORS ===')
-      console.log('Fetching creators...')
+      const timestamp = new Date().toISOString()
+      console.log(`[${timestamp}] === FETCHING CREATORS ===`)
+      console.log(`[${timestamp}] Fetching creators...`)
       
       // Try to fetch creators with detailed error logging
       const { data, error } = await supabase
@@ -112,62 +167,67 @@ export default function ResultPage() {
         .order('total_followers', { ascending: false })
         .limit(50) // Increased limit to have more options for filtering
 
-      console.log('Supabase response:', { data, error })
+      console.log(`[${timestamp}] Supabase response:`, { dataCount: data?.length, error })
       
       if (error) {
-        console.error('Error fetching creators:', error)
+        console.error(`[${timestamp}] Error fetching creators:`, error)
         setCreators([])
       } else {
-        console.log('All creators fetched:', data?.length || 0)
+        console.log(`[${timestamp}] All creators fetched:`, data?.length || 0)
         setCreators(data || [])
       }
     } catch (error) {
-      console.error('Error:', error)
-      setCreators([])
-    } finally {
-      setLoading(false)
-    }
+        const timestamp = new Date().toISOString()
+        console.error(`[${timestamp}] Error:`, error)
+        setCreators([])
+      } finally {
+        setLoading(false)
+      }
   }
 
   useEffect(() => {
-    console.log('=== USER EFFECT TRIGGERED ===', { user: user?.id })
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] === USER EFFECT TRIGGERED ===`, { userId: user?.id })
     if (user) {
-      console.log('User exists, fetching creators...')
+      console.log(`[${timestamp}] User exists, fetching creators...`)
       fetchCreators()
     } else {
-      console.log('No user, skipping creator fetch')
+      console.log(`[${timestamp}] No user, skipping creator fetch`)
       setLoading(false)
     }
   }, [user])
 
   useEffect(() => {
-    console.log('=== FILTERING EFFECT TRIGGERED ===', { 
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] === FILTERING EFFECT TRIGGERED ===`, { 
       creatorsCount: creators.length, 
       selectedCategory,
-      user: user?.id 
+      userId: user?.id,
+      saveUserMatchRef: saveUserMatch.toString().slice(0, 50) + '...'
     })
     
     if (creators.length > 0 && selectedCategory) {
-      console.log('Filtering creators for category:', selectedCategory)
+      console.log(`[${timestamp}] Filtering creators for category:`, selectedCategory)
       const filtered = creators.filter(creator => {
         if (selectedCategory === 'all') return true
         return creator.categories && creator.categories.includes(selectedCategory)
       })
-      console.log('Filtered creators:', filtered.length)
+      console.log(`[${timestamp}] Filtered creators:`, filtered.length)
+      console.log(`[${timestamp}] Filtered creator IDs:`, filtered.map(c => c.id))
       setFilteredCreators(filtered)
       
       // Save the match when creators are filtered
       if (filtered.length > 0 && user) {
-        console.log('Calling saveUserMatch with', filtered.length, 'creators and user:', user.id)
+        console.log(`[${timestamp}] 🎯 Calling saveUserMatch with`, filtered.length, 'creators and user:', user.id)
         saveUserMatch(filtered, selectedCategory)
       } else {
-        console.log('No filtered creators to save or no user. Filtered:', filtered.length, 'User:', !!user)
+        console.log(`[${timestamp}] No filtered creators to save or no user. Filtered:`, filtered.length, 'User:', !!user)
       }
     } else {
-      console.log('Skipping filter - creators:', creators.length, 'selectedCategory:', selectedCategory)
+      console.log(`[${timestamp}] Skipping filter - creators:`, creators.length, 'selectedCategory:', selectedCategory)
       setFilteredCreators([])
     }
-  }, [creators, selectedCategory, saveUserMatch, user])
+  }, [creators, selectedCategory, user, saveUserMatch])
 
   const formatFollowers = (count: number) => {
     if (count >= 1000000) {
