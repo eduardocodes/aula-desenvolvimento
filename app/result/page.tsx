@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
@@ -37,6 +37,18 @@ interface Creator {
   is_btc_only: boolean
 }
 
+// Componente separado para lidar com useSearchParams
+function SearchParamsHandler({ onParamsReceived }: { onParamsReceived: (category: string | null) => void }) {
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const category = searchParams.get('category')
+    onParamsReceived(category)
+  }, [searchParams, onParamsReceived])
+
+  return null
+}
+
 export default function ResultPage() {
   const [user, setUser] = useState<User | null>(null)
   const [creators, setCreators] = useState<Creator[]>([])
@@ -44,10 +56,17 @@ export default function ResultPage() {
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const router = useRouter()
-  const searchParams = useSearchParams()
   
   // Ref para rastrear último match salvo e evitar duplicatas
   const lastSavedMatchRef = useRef<string | null>(null)
+
+  // Função para lidar com parâmetros da URL
+  const handleParamsReceived = useCallback((category: string | null) => {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] === CATEGORY EFFECT ===`)
+    console.log(`[${timestamp}] Setting category from URL:`, category)
+    setSelectedCategory(category)
+  }, [])
   // Ref para controlar se já está salvando
   const isSavingRef = useRef<boolean>(false)
 
@@ -70,14 +89,7 @@ export default function ResultPage() {
     checkUser()
   }, [router])
 
-  useEffect(() => {
-    // Get category from URL params
-    const timestamp = new Date().toISOString()
-    const category = searchParams.get('category')
-    console.log(`[${timestamp}] === CATEGORY EFFECT ===`)
-    console.log(`[${timestamp}] Setting category from URL:`, category)
-    setSelectedCategory(category)
-  }, [searchParams])
+  // Removido useEffect que usava searchParams - agora é tratado pelo callback
 
   const saveUserMatch = useCallback(async (matchedCreators: Creator[], category: string | null) => {
     const timestamp = new Date().toISOString()
@@ -472,6 +484,11 @@ export default function ResultPage() {
             </div>
         )}
       </div>
+      
+      {/* Componente para lidar com parâmetros da URL */}
+      <Suspense fallback={null}>
+        <SearchParamsHandler onParamsReceived={handleParamsReceived} />
+      </Suspense>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { User } from '@supabase/supabase-js'
@@ -40,6 +40,23 @@ interface UserMatch {
   created_at: string
 }
 
+// Componente separado para lidar com useSearchParams
+function OnboardingChecker({ onOnboardingCompleted }: { onOnboardingCompleted: () => void }) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (searchParams.get('onboarding') === 'completed') {
+      console.log('🔍 [DEBUG] Usuário veio do onboarding, mostrando mensagem de sucesso')
+      onOnboardingCompleted()
+      // Remover o parâmetro da URL
+      router.replace('/dashboard')
+    }
+  }, [searchParams, router, onOnboardingCompleted])
+
+  return null
+}
+
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -49,7 +66,13 @@ export default function Dashboard() {
   const [latestMatch, setLatestMatch] = useState<UserMatch | null>(null)
 
   const router = useRouter()
-  const searchParams = useSearchParams()
+
+  // Função para lidar com onboarding completed
+  const handleOnboardingCompleted = () => {
+    setShowSuccess(true)
+    // Esconder a mensagem após 5 segundos
+    setTimeout(() => setShowSuccess(false), 5000)
+  }
 
   const fetchUserMatches = async (userId: string) => {
     try {
@@ -133,16 +156,6 @@ export default function Dashboard() {
       // Fetch user matches after setting user
       console.log('🔍 [DEBUG] Chamando fetchUserMatches com user.id:', user.id)
       await fetchUserMatches(user.id)
-      
-      // Verificar se veio do onboarding
-      if (searchParams.get('onboarding') === 'completed') {
-        console.log('🔍 [DEBUG] Usuário veio do onboarding, mostrando mensagem de sucesso')
-        setShowSuccess(true)
-        // Remover o parâmetro da URL
-        router.replace('/dashboard')
-        // Esconder a mensagem após 5 segundos
-        setTimeout(() => setShowSuccess(false), 5000)
-      }
     }
 
     getUser()
@@ -522,6 +535,11 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+      
+      {/* Componente para verificar parâmetros de onboarding */}
+      <Suspense fallback={null}>
+        <OnboardingChecker onOnboardingCompleted={handleOnboardingCompleted} />
+      </Suspense>
     </div>
   )
 }
